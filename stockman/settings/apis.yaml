@@ -1,0 +1,7 @@
+APIS:
+  Tushare:
+    Params:
+      token: 635ef021ba199c188116ac5465039f409565454cf3be74feaf94cf6f
+    Permissions:
+      stock_daily: true
+      stock_list: true

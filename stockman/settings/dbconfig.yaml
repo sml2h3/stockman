@@ -1,0 +1,8 @@
+DBCONFIG:
+  charset: utf8
+  dbname: stockdb
+  host: 192.168.1.121
+  password: BfZGpBMYenKy5sza
+  port: 3306
+  prefix: stockman_
+  username: stockdb

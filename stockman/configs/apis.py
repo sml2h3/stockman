@@ -15,4 +15,5 @@ class Apis:
         class Permissions:
             stock_list = True
             stock_daily = True
+            stock_trade_cal = True
 

@@ -24,6 +24,5 @@ def init_data():
             do_op = op[init_op]
             data = getattr(do_op, init_op)()
             getattr(db, "{}_insert_or_update".format(init_op))(data)
-            exit()
     else:
         raise exceptions.NotInstalled("数据系统尚未安装，请安装后再进行初始化操作")

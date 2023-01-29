@@ -17,7 +17,13 @@ class BaseApi:
     def __init__(self):
         pass
 
+    def stock_trade_cal(self):
+        pass
+
     def stock_list(self):
+        pass
+
+    def stock_daily(self):
         pass
 
 

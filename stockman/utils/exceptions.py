@@ -24,3 +24,7 @@ class NotInstalled(BaseException):
 
 class InstallDuplicated(BaseException):
     pass
+
+
+class OverTimesLimits(BaseException):
+    pass

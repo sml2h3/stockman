@@ -32,6 +32,63 @@ CREATE TABLE `{}stock_list`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 '''
 
+create_stock_day_k_table_sql = '''
+CREATE TABLE `{}day_k`  (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `stock_code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '股票代码',
+  `stock_trade_date` int(11) NULL DEFAULT NULL COMMENT '股票交易日期',
+  `stock_close` float NULL DEFAULT NULL COMMENT '股票收盘价',
+  `stock_open` float NULL DEFAULT NULL COMMENT '股票开盘价',
+  `stock_high` float NULL DEFAULT NULL COMMENT '股票最高价',
+  `stock_low` float NULL DEFAULT NULL COMMENT '股票最低价',
+  `stock_pre_close` float NULL DEFAULT NULL COMMENT '股票昨收价',
+  `stock_change` float NULL DEFAULT NULL COMMENT '股票涨跌额',
+  `stock_pct_change` float NULL DEFAULT NULL COMMENT '股票涨跌幅',
+  `stock_vol` float NULL DEFAULT NULL COMMENT '股票成交量（手）',
+  `stock_amount` float NULL DEFAULT NULL COMMENT '股票成交额（千元）',
+  `stock_adj_factor` float NULL DEFAULT NULL COMMENT '股票复权因子',
+  `stock_open_hfq` float NULL DEFAULT NULL COMMENT '股票开盘价后复权',
+  `stock_open_qfq` float NULL DEFAULT NULL COMMENT '股票开盘价前复权',
+  `stock_close_hfq` float NULL DEFAULT NULL COMMENT '股票收盘价后复权',
+  `stock_close_qfq` float NULL DEFAULT NULL COMMENT '股票收盘价前复权',
+  `stock_high_hfq` float NULL DEFAULT NULL COMMENT '股票最高价后复权',
+  `stock_high_qfq` float NULL DEFAULT NULL COMMENT '股票最高价前复权',
+  `stock_low_hfq` float NULL DEFAULT NULL COMMENT '股票最低价后复权',
+  `stock_low_qfq` float NULL DEFAULT NULL COMMENT '股票最低价前复权',
+  `stock_pre_close_hfq` float NULL DEFAULT NULL COMMENT '股票昨收价后复权',
+  `stock_pre_close_qfq` float NULL DEFAULT NULL COMMENT '股票昨收价前复权',
+  `stock_macd_dif` float NULL DEFAULT NULL COMMENT '股票macd_diff',
+  `stock_macd_dea` float NULL DEFAULT NULL COMMENT '股票macd_dea',
+  `stock_macd` float NULL DEFAULT NULL COMMENT '股票macd',
+  `stock_kdj_k` float NULL DEFAULT NULL COMMENT '股票KDJ_K',
+  `stock_kdj_d` float NULL DEFAULT NULL COMMENT '股票KDJ_D',
+  `stock_kdj_j` float NULL DEFAULT NULL COMMENT '股票KDJ_J',
+  `stock_rsi_6` float NULL DEFAULT NULL COMMENT '股票RSI-6',
+  `stock_rsi_12` float NULL DEFAULT NULL COMMENT '股票RSI-12',
+  `stock_rsi_24` float NULL DEFAULT NULL COMMENT '股票RSI-24',
+  `stock_boll_upper` float NULL DEFAULT NULL COMMENT '股票BOLL_UPPER',
+  `stock_boll_mid` float NULL DEFAULT NULL COMMENT '股票BOLL_MID',
+  `stock_boll_lower` float NULL DEFAULT NULL COMMENT '股票BOLL_LOWER',
+  `cci` float NULL DEFAULT NULL COMMENT '股票CCI',
+  PRIMARY KEY (`Id`) USING BTREE,
+  INDEX `stock_code`(`stock_code`) USING BTREE COMMENT '股票代码',
+  INDEX `stock_trade_date`(`stock_trade_date`) USING BTREE COMMENT '股票交易日期',
+  UNIQUE INDEX `unique_key`(`stock_code`, `stock_trade_date`) USING BTREE COMMENT '唯一键值'
+) ENGINE = InnoDB AUTO_INCREMENT = 665 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+'''
+
+create_stock_cal_table_sql = '''
+CREATE TABLE `{}trade_cal`  (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `stock_cal_date` int(11) NULL DEFAULT NULL COMMENT '日历日期',
+  `stock_is_open` int(1) NULL DEFAULT 0 COMMENT '是否交易 0休市 1交易',
+  `stock_pretrade_date` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上一个交易日',
+  PRIMARY KEY (`Id`) USING BTREE,
+  UNIQUE INDEX `stock_cal_date`(`stock_cal_date`) USING BTREE COMMENT '日历日期',
+  INDEX `stock_is_open`(`stock_is_open`) USING BTREE COMMENT '是否交易'
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+'''
+
 show_tables_sql = '''
 show tables;
 '''
@@ -53,7 +110,57 @@ stock_list_col_names = [
     "stock_hs",
 ]
 
+stock_daily_col_names = [
+    "stock_code",
+    "stock_trade_date",
+    "stock_close",
+    "stock_open",
+    "stock_high",
+    "stock_low",
+    "stock_pre_close",
+    "stock_change",
+    "stock_pct_change",
+    "stock_vol",
+    "stock_amount",
+    "stock_adj_factor",
+    "stock_open_hfq",
+    "stock_open_qfq",
+    "stock_close_hfq",
+    "stock_close_qfq",
+    "stock_high_hfq",
+    "stock_high_qfq",
+    "stock_low_hfq",
+    "stock_low_qfq",
+    "stock_pre_close_hfq",
+    "stock_pre_close_qfq",
+    "stock_macd_dif",
+    "stock_macd_dea",
+    "stock_macd",
+    "stock_kdj_k",
+    "stock_kdj_d",
+    "stock_kdj_j",
+    "stock_rsi_6",
+    "stock_rsi_12",
+    "stock_rsi_24",
+    "stock_boll_upper",
+    "stock_boll_mid",
+    "stock_boll_lower",
+    "cci"
+]
+
 stock_list_insert_or_update_sql = "INSERT INTO {}stock_list ({}) VALUE ({}) ON DUPLICATE KEY UPDATE {}"
+
+stock_trade_cal_insert_sql = "INSERT INTO {}trade_cal (stock_cal_date, stock_is_open, stock_pretrade_date) VALUE ( %s, %s, %s)"
+
+stock_daily_insert_or_update_sql = "INSERT INTO {}day_k ({}) VALUE ({}) ON DUPLICATE KEY UPDATE {}"
+
+stock_get_trade_cal_from_now_sql = "SELECT stock_cal_date, stock_pretrade_date FROM {}trade_cal WHERE stock_is_open = 1 AND stock_cal_date < {}"
+
+stock_get_trade_cal_from_now_sql_fix = " AND stock_cal_date > {}"
+
+stock_check_trade_date_sql = "SELECT stock_is_open FROM {}trade_cal WHERE stock_cal_date = {}"
+
+stock_daily_get_last_trade_date_sql = "SELECT DISTINCT stock_trade_date FROM {}day_k"
 
 stock_list_fields = [
     "ts_code",
@@ -73,11 +180,61 @@ stock_list_fields = [
     "is_hs"
 ]
 
+stock_trade_cal_fields = [
+    "cal_date",
+    "is_open",
+    "pretrade_date"
+]
+
+stock_daily_fields = [
+    "ts_code",
+    "trade_date",
+    "close",
+    "open",
+    "high",
+    "low",
+    "pre_close",
+    "change",
+    "pct_change",
+    "vol",
+    "amount",
+    "adj_factor",
+    "open_hfq",
+    "open_qfq",
+    "close_hfq",
+    "close_qfq",
+    "high_hfq",
+    "high_qfq",
+    "low_hfq",
+    "low_qfq",
+    "pre_close_hfq",
+    "pre_close_qfq",
+    "macd_dif",
+    "macd_dea",
+    "macd",
+    "kdj_k",
+    "kdj_d",
+    "kdj_j",
+    "rsi_6",
+    "rsi_12",
+    "rsi_24",
+    "boll_upper",
+    "boll_mid",
+    "boll_lower",
+    "cci"
+]
+
 stock_list_status = [
     "L",
     "D",
     "P"
 ]
+
+stock_prefix = {
+    "SZSE": "SZ",
+    "BSE": "BJ",
+    "SSE": "SH",
+}
 
 # 数据源列表，默认首字母大写
 apis_list = [
@@ -88,10 +245,12 @@ apis_list = [
 permissons_list = [
     'stock_list',  # 股票列表
     'stock_daily',  # 股票日线数据
+    'stock_trade_cal',  # 股票交易日历
 ]
 
 # 初始化时 按顺序需要执行的操作
 init_ops = [
     "stock_list",
+    "stock_trade_cal",
     "stock_daily",
 ]

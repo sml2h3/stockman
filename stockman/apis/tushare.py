@@ -54,44 +54,41 @@ class Tushare(BaseApi):
                     data.append(data_item)
         return data
 
-
-    def stock_daily(self, not_init=False):
-        if not_init:
-            pass
-        else:
-            db_config = configs.read_config("dbconfig")
-            db = dbutil.Db(config=db_config)
-            now = datetime.datetime.now()
-            end_date = int(now.strftime("%Y%m%d"))
-            is_open = db.check_trade_date(end_date)
-            if is_open:
-                now_h = now.strftime("%H")
-                if int(now_h) < 18:
-                    end_date = end_date - 1
-            last_trade_date = db.get_daily_last_trade_date()
-            history_trade_cal = db.get_trade_cal_from_now(end_date, start_date=last_trade_date)
-            for trade_cal_item in history_trade_cal:
-                date = trade_cal_item['stock_cal_date']
-                try:
-                    data = self.stock_daily_sub(date)
-                except exceptions.OverTimesLimits as e:
-                    print(int(str(e)))
-                    time.sleep(int(str(e)))
-                    data = self.stock_daily_sub(date)
-                for item in data:
-                    item[0] = item[0][:-3]
-                    for idx, n in enumerate(item):
-                        if idx > 1:
-                            if math.isnan(item[idx]):
-                                item[idx] = float(0)
-                            else:
-                                item[idx] = float(n)
-                db.stock_daily_insert_or_update(data)
+    def stock_daily(self):
+        db_config = configs.read_config("dbconfig")
+        db = dbutil.Db(config=db_config)
+        now = datetime.datetime.now()
+        end_date = int(now.strftime("%Y%m%d"))
+        is_open = db.check_trade_date(end_date)
+        if is_open:
+            now_h = now.strftime("%H")
+            if int(now_h) < 18:
+                end_date = end_date - 1
+        last_trade_date = db.get_daily_last_trade_date()
+        history_trade_cal = db.get_trade_cal_from_now(end_date, start_date=last_trade_date)
+        for trade_cal_item in history_trade_cal:
+            date = trade_cal_item['stock_cal_date']
+            try:
+                data = self.stock_daily_sub(date)
+            except exceptions.OverTimesLimits as e:
+                time.sleep(int(str(e)))
+                data = self.stock_daily_sub(date)
+            for item in data:
+                item[0] = item[0][:-3]
+                for idx, n in enumerate(item):
+                    if idx > 1:
+                        if math.isnan(item[idx]):
+                            item[idx] = float(0)
+                        else:
+                            item[idx] = float(n)
+            db.stock_daily_insert_or_update(data)
+        if not last_trade_date:
+            # 如果是交易日执行的初始化，可能导入完数据后已经超过交易日的下午6点，则需要补足数据
+            self.stock_daily()
         return []
 
     @timeslimit.func_param(60, 100)
     def stock_daily_sub(self, trade_date=""):
-        print(trade_date, datetime.datetime.now())
         data = []
         pro = ts.pro_api()
         df = pro.stk_factor(**{

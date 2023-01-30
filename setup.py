@@ -11,7 +11,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="stockman",
-    version="0.0.1",
+    version="0.0.2",
     author="sml2h3",
     description="A股量化数据工具",
     long_description=long_description,

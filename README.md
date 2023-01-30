@@ -5,6 +5,16 @@
 友好的A股量化数据包，支持tushare等多数据渠道（其他渠道开发中）收集，自带常用和非常用数据指标（开发中）
 
 ----
+## 安装
+```shell
+# 1、直接pip安装，国内源在项目更新后需要1-2天同步
+pip install stockman
+
+# 2、从源代码安装
+git clone https://github.com/sml2h3/stockman.git
+cd stockman
+python setup.py install
+```
 
 ## 一、使用方式
 

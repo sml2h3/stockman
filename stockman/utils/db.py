@@ -25,6 +25,8 @@ class Db:
             create_stock_list_table_sql,  # 创建stock_list表
             create_stock_day_k_table_sql,  # 创建日线数据表
             create_stock_cal_table_sql,  # 创建交易日历表
+            create_stock_func_limits_table_sql,  # 创建函数频率限制数据
+            init_stock_func_limits_data_sql,   # 初始化函数频率限制数据
         ]
         self.__conn = pymysql.connect(host=self.__host, user=self.__username, password=self.__password, port=self.__port
                                       , db=self.__dbname, charset=self.__charset,
@@ -136,6 +138,28 @@ class Db:
         else:
             raise NotInstalled("数据库尚未安装，请先安装数据库")
         return data
+
+    def get_func_limits(self, api_source, func_name):
+        sql = stock_get_func_times_limits_sql.format(self.__prefix)
+        if self.install_check():
+            cursor = self.__conn.cursor()
+            cursor.execute(sql, [api_source, func_name])
+            data = cursor.fetchone()
+            cursor.close()
+        else:
+            raise NotInstalled("数据库尚未安装，请先安装数据库")
+        return data
+
+    def set_func_limits(self, api_source, func_name, stock_times, stock_times_time):
+        sql = stock_set_func_times_limits_sql.format(self.__prefix)
+        if self.install_check():
+            cursor = self.__conn.cursor()
+            result = cursor.execute(sql, [stock_times, stock_times_time, api_source, func_name])
+            cursor.close()
+            self.__conn.commit()
+        else:
+            raise NotInstalled("数据库尚未安装，请先安装数据库")
+        return result
 
     @staticmethod
     def create_table(cursor, sql):

@@ -89,6 +89,25 @@ CREATE TABLE `{}trade_cal`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 '''
 
+create_stock_func_limits_table_sql = '''
+DROP TABLE IF EXISTS `{}func_limits`;
+CREATE TABLE `stockman_func_limits`  (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `stock_api_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '数据源名称',
+  `stock_func_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '调用的函数名称',
+  `stock_times` int(11) NULL DEFAULT NULL COMMENT '在某个时间长度内最大调用次数',
+  `stock_times_time` int(11) NULL DEFAULT NULL COMMENT '单位时间长度，单位为秒',
+  PRIMARY KEY (`Id`) USING BTREE,
+  INDEX `stock_api_name`(`stock_api_name`) USING BTREE COMMENT '数据源名称',
+  INDEX `stock_func_name`(`stock_func_name`) USING BTREE COMMENT '调用的函数名称',
+  UNIQUE INDEX `unique_keys`(`stock_api_name`, `stock_func_name`) USING BTREE COMMENT '数据源对应的函数名称只能有一个'
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+'''
+
+init_stock_func_limits_data_sql = '''
+INSERT INTO `{}func_limits` VALUES (1, 'tushare', 'stock_daily_sub', 100, 60);
+'''
+
 show_tables_sql = '''
 show tables;
 '''
@@ -154,13 +173,17 @@ stock_trade_cal_insert_sql = "INSERT INTO {}trade_cal (stock_cal_date, stock_is_
 
 stock_daily_insert_or_update_sql = "INSERT INTO {}day_k ({}) VALUE ({}) ON DUPLICATE KEY UPDATE {}"
 
-stock_get_trade_cal_from_now_sql = "SELECT stock_cal_date, stock_pretrade_date FROM {}trade_cal WHERE stock_is_open = 1 AND stock_cal_date < {}"
+stock_get_trade_cal_from_now_sql = "SELECT stock_cal_date, stock_pretrade_date FROM {}trade_cal WHERE stock_is_open = 1 AND stock_cal_date <= {}"
 
 stock_get_trade_cal_from_now_sql_fix = " AND stock_cal_date > {}"
 
 stock_check_trade_date_sql = "SELECT stock_is_open FROM {}trade_cal WHERE stock_cal_date = {}"
 
 stock_daily_get_last_trade_date_sql = "SELECT DISTINCT stock_trade_date FROM {}day_k"
+
+stock_get_func_times_limits_sql = "SELECT * FROM {}func_limits WHERE stock_api_name = %s AND stock_func_name = %s"
+
+stock_set_func_times_limits_sql = "UPDATE {}func_limits SET stock_times = %s, stock_times_time = %s WHERE stock_api_name = %s AND stock_func_name = %s"
 
 stock_list_fields = [
     "ts_code",

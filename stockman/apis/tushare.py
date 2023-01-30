@@ -54,7 +54,7 @@ class Tushare(BaseApi):
                     data.append(data_item)
         return data
 
-    def stock_daily(self):
+    def stock_daily(self, update=False):
         db_config = configs.read_config("dbconfig")
         db = dbutil.Db(config=db_config)
         now = datetime.datetime.now()
@@ -62,10 +62,12 @@ class Tushare(BaseApi):
         is_open = db.check_trade_date(end_date)
         if is_open:
             now_h = now.strftime("%H")
-            if int(now_h) < 18:
-                end_date = end_date - 1
+            if not update:
+                if int(now_h) < 18:
+                    end_date = end_date - 1
         last_trade_date = db.get_daily_last_trade_date()
         history_trade_cal = db.get_trade_cal_from_now(end_date, start_date=last_trade_date)
+        data = []
         for trade_cal_item in history_trade_cal:
             date = trade_cal_item['stock_cal_date']
             try:
@@ -85,10 +87,14 @@ class Tushare(BaseApi):
         if not last_trade_date:
             # 如果是交易日执行的初始化，可能导入完数据后已经超过交易日的下午6点，则需要补足数据
             self.stock_daily()
-        return []
+        if not update:
+            return []
+        else:
+            return len(data)
 
-    @timeslimit.func_param(60, 100)
-    def stock_daily_sub(self, trade_date=""):
+    @timeslimit.func_param()
+    @staticmethod
+    def stock_daily_sub(trade_date="") -> list:
         data = []
         pro = ts.pro_api()
         df = pro.stk_factor(**{
@@ -118,7 +124,8 @@ class Tushare(BaseApi):
                 break
         return data
 
-    def stock_trade_cal_sub(self, start_date=""):
+    @staticmethod
+    def stock_trade_cal_sub(start_date=""):
         data = []
         pro = ts.pro_api()
         # 拉取数据

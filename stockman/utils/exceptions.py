@@ -28,3 +28,11 @@ class InstallDuplicated(BaseException):
 
 class OverTimesLimits(BaseException):
     pass
+
+
+class FuncTimesLimitsNotFound(BaseException):
+    pass
+
+
+class NotAllowedFormat(BaseException):
+    pass

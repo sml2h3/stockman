@@ -27,7 +27,7 @@ class BaseApi:
         pass
 
 
-def get_api_op() -> dict[BaseApi]:
+def get_api_op() -> dict[str]:
     # 初始化权限表
     permissions_dict = dict()
     for permission_item in permissions_list:

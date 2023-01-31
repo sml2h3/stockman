@@ -83,6 +83,7 @@ class Tushare(BaseApi):
                             item[idx] = float(0)
                         else:
                             item[idx] = float(n)
+
             db.stock_daily_insert_or_update(data)
         if not last_trade_date:
             # 如果是交易日执行的初始化，可能导入完数据后已经超过交易日的下午6点，则需要补足数据
@@ -105,11 +106,28 @@ class Tushare(BaseApi):
             "limit": "",
             "offset": ""
         }, fields=contants.stock_daily_fields)
+        # df_ts_code = df.ts_code.values.tolist()
+        df_limit = pro.stk_limit(**{
+            "ts_code": "",
+            "start_date": "",
+            "end_date": "",
+            "trade_date": trade_date,
+        }, fields=contants.stock_daily_limit_fields)
+        df_limit_ts_code = df_limit.ts_code.values.tolist()
         nums = df.shape[0]
         for i in range(nums):
             item = df.loc[i]
             item = item.tolist()
             item = [n if n is not None else float(0) for n in item]
+            ts_code = item[0]
+            try:
+                df_limit_ts_code_index = df_limit_ts_code.index(ts_code)
+            except Exception:
+                df_limit_ts_code_index = None
+            if df_limit_ts_code_index:
+                item = item + df_limit.loc[df_limit_ts_code_index].tolist()[1:]
+            else:
+                item = item + [float(0), float(0)]
             data.append(item)
         return data
 

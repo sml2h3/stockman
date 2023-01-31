@@ -5,7 +5,7 @@
       Project: PyCharm
 """
 import pymysql
-import datetime
+from collections import namedtuple
 from ..configs import dbconfig
 from .contants import *
 from .exceptions import *
@@ -23,10 +23,10 @@ class Db:
         self.__prefix = config.prefix
         self.__install_sql_list = [
             create_stock_list_table_sql,  # 创建stock_list表
-            create_stock_day_k_table_sql,  # 创建日线数据表
+            create_stock_daily_k_table_sql,  # 创建日线数据表
             create_stock_cal_table_sql,  # 创建交易日历表
             create_stock_func_limits_table_sql,  # 创建函数频率限制数据
-            init_stock_func_limits_data_sql,   # 初始化函数频率限制数据
+            init_stock_func_limits_data_sql,  # 初始化函数频率限制数据
         ]
         self.__conn = pymysql.connect(host=self.__host, user=self.__username, password=self.__password, port=self.__port
                                       , db=self.__dbname, charset=self.__charset,
@@ -124,7 +124,7 @@ class Db:
             return None
         data = [item[0] for item in data]
         data = sorted(data, reverse=True)
-        return data[0] + 1
+        return data[0]
 
     def get_trade_cal_from_now(self, end_date, start_date=None):
         sql = stock_get_trade_cal_from_now_sql.format(self.__prefix, end_date)
@@ -164,3 +164,39 @@ class Db:
     @staticmethod
     def create_table(cursor, sql):
         cursor.execute(sql)
+
+    def get_all_stock_list(self):
+        sql = stock_get_all_stock_list_sql.format(self.__prefix)
+        if self.install_check():
+            cursor = self.__conn.cursor()
+            cursor.execute(sql, [])
+            cursor.close()
+            self.__conn.commit()
+            result = cursor.fetchall()
+        else:
+            raise NotInstalled("数据库尚未安装，请先安装数据库")
+        return result
+
+    def get_single_stock_daily_k_data(self, code):
+        sql = stock_get_single_stock_daily_k_sql.format(self.__prefix)
+        if self.install_check():
+            cursor = self.__conn.cursor()
+            cursor.execute(sql, [code])
+            cursor.close()
+            self.__conn.commit()
+            result = cursor.fetchall()
+        else:
+            raise NotInstalled("数据库尚未安装，请先安装数据库")
+        return result
+
+    def get_single_stock_stock_list_data(self, code):
+        sql = stock_get_single_stock_list_sql.format(self.__prefix)
+        if self.install_check():
+            cursor = self.__conn.cursor()
+            cursor.execute(sql, [code])
+            cursor.close()
+            self.__conn.commit()
+            result = cursor.fetchall()
+        else:
+            raise NotInstalled("数据库尚未安装，请先安装数据库")
+        return result

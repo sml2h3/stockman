@@ -32,8 +32,8 @@ CREATE TABLE `{}stock_list`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 '''
 
-create_stock_day_k_table_sql = '''
-CREATE TABLE `{}day_k`  (
+create_stock_daily_k_table_sql = '''
+CREATE TABLE `stockman_daily_k`  (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `stock_code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '股票代码',
   `stock_trade_date` int(11) NULL DEFAULT NULL COMMENT '股票交易日期',
@@ -70,11 +70,13 @@ CREATE TABLE `{}day_k`  (
   `stock_boll_mid` float NULL DEFAULT NULL COMMENT '股票BOLL_MID',
   `stock_boll_lower` float NULL DEFAULT NULL COMMENT '股票BOLL_LOWER',
   `cci` float NULL DEFAULT NULL COMMENT '股票CCI',
+  `stock_up_limit` float NULL DEFAULT NULL COMMENT '股票涨停价格',
+  `stock_down_limit` float NULL DEFAULT NULL COMMENT '股票跌停价格',
   PRIMARY KEY (`Id`) USING BTREE,
+  UNIQUE INDEX `unique_key`(`stock_code`, `stock_trade_date`) USING BTREE COMMENT '唯一键值',
   INDEX `stock_code`(`stock_code`) USING BTREE COMMENT '股票代码',
-  INDEX `stock_trade_date`(`stock_trade_date`) USING BTREE COMMENT '股票交易日期',
-  UNIQUE INDEX `unique_key`(`stock_code`, `stock_trade_date`) USING BTREE COMMENT '唯一键值'
-) ENGINE = InnoDB AUTO_INCREMENT = 665 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+  INDEX `stock_trade_date`(`stock_trade_date`) USING BTREE COMMENT '股票交易日期'
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 '''
 
 create_stock_cal_table_sql = '''
@@ -90,7 +92,6 @@ CREATE TABLE `{}trade_cal`  (
 '''
 
 create_stock_func_limits_table_sql = '''
-DROP TABLE IF EXISTS `{}func_limits`;
 CREATE TABLE `stockman_func_limits`  (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `stock_api_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '数据源名称',
@@ -164,14 +165,17 @@ stock_daily_col_names = [
     "stock_boll_upper",
     "stock_boll_mid",
     "stock_boll_lower",
-    "cci"
+    "cci",
+    "stock_up_limit",
+    "stock_down_limit"
 ]
+
 
 stock_list_insert_or_update_sql = "INSERT INTO {}stock_list ({}) VALUE ({}) ON DUPLICATE KEY UPDATE {}"
 
 stock_trade_cal_insert_sql = "INSERT INTO {}trade_cal (stock_cal_date, stock_is_open, stock_pretrade_date) VALUE ( %s, %s, %s)"
 
-stock_daily_insert_or_update_sql = "INSERT INTO {}day_k ({}) VALUE ({}) ON DUPLICATE KEY UPDATE {}"
+stock_daily_insert_or_update_sql = "INSERT INTO {}daily_k ({}) VALUE ({}) ON DUPLICATE KEY UPDATE {}"
 
 stock_get_trade_cal_from_now_sql = "SELECT stock_cal_date, stock_pretrade_date FROM {}trade_cal WHERE stock_is_open = 1 AND stock_cal_date <= {}"
 
@@ -179,11 +183,17 @@ stock_get_trade_cal_from_now_sql_fix = " AND stock_cal_date > {}"
 
 stock_check_trade_date_sql = "SELECT stock_is_open FROM {}trade_cal WHERE stock_cal_date = {}"
 
-stock_daily_get_last_trade_date_sql = "SELECT DISTINCT stock_trade_date FROM {}day_k"
+stock_daily_get_last_trade_date_sql = "SELECT DISTINCT stock_trade_date FROM {}daily_k"
 
 stock_get_func_times_limits_sql = "SELECT * FROM {}func_limits WHERE stock_api_name = %s AND stock_func_name = %s"
 
 stock_set_func_times_limits_sql = "UPDATE {}func_limits SET stock_times = %s, stock_times_time = %s WHERE stock_api_name = %s AND stock_func_name = %s"
+
+stock_get_single_stock_daily_k_sql = "SELECT * FROM {}daily_k WHERE stock_code = %s ORDER BY stock_trade_date ASC"
+
+stock_get_single_stock_list_sql = "SELECT * FROM {}stock_list WHERE stock_code = %s AND stock_status = 'L'"
+
+stock_get_all_stock_list_sql = "SELECT * FROM {}stock_list WHERE stock_status = 'L'"
 
 stock_list_fields = [
     "ts_code",
@@ -208,6 +218,13 @@ stock_trade_cal_fields = [
     "is_open",
     "pretrade_date"
 ]
+
+stock_daily_limit_fields = [
+    "ts_code",
+    "up_limit",
+    "down_limit",
+]
+
 
 stock_daily_fields = [
     "ts_code",

@@ -36,3 +36,6 @@ class FuncTimesLimitsNotFound(BaseException):
 
 class NotAllowedFormat(BaseException):
     pass
+
+class NotAllowedFormat(BaseException):
+    pass

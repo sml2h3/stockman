@@ -20,5 +20,6 @@ def update_stock_list_data():
 
 
 if __name__ == '__main__':
-    update_daily_k_data()
     update_stock_list_data()
+    nums = update_daily_k_data()
+

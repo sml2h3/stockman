@@ -18,10 +18,7 @@ def set_func_times_limit(feature: str = "tushare.stock_daily_sub", limit_time: [
     stock_times_time = limit_time[1]
     db_config = configs.read_config("dbconfig")
     db = dbutil.Db(config=db_config)
-    if db.install_check():
-        if db.get_func_limits(api_source, func_name):
-            db.set_func_limits(api_source, func_name, stock_times, stock_times_time)
-        else:
-            raise exceptions.FuncTimesLimitsNotFound("接口调用频率限制数据未找到")
+    if db.get_func_limits(api_source, func_name):
+        db.set_func_limits(api_source, func_name, stock_times, stock_times_time)
     else:
-        raise exceptions.NotInstalled("数据系统尚未安装，请安装后再进行初始化操作")
+        raise exceptions.FuncTimesLimitsNotFound("接口调用频率限制数据未找到")

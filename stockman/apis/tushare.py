@@ -94,7 +94,6 @@ class Tushare(BaseApi):
             return len(data)
 
     @timeslimit.func_param()
-    @staticmethod
     def stock_daily_sub(trade_date="") -> list:
         data = []
         pro = ts.pro_api()

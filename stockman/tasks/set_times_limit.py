@@ -4,6 +4,8 @@
       File:    set_times_limit                             
       Project: PyCharm                     
 """
+from __future__ import annotations
+
 from ..utils import contants
 from ..utils import db as dbutil
 from ..utils import exceptions

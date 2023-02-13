@@ -4,6 +4,7 @@
       File:    __init__
       Project: PyCharm
 """
+from __future__ import annotations
 
 from . import configs
 from .tasks import init_data

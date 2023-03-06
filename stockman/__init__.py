@@ -70,5 +70,4 @@ class Stock:
         return stock_data.get_single_stock_history_stock_list_local(code)
 
     def select_stock(self, func):
-        if isfunction(func):
-            stock_data.select_stock(func)
+        return stock_data.select_stock(func)

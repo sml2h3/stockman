@@ -26,8 +26,11 @@ class BaseApi:
     def stock_daily(self):
         pass
 
+    def stock_ths_index(self):
+        pass
 
-def get_api_op() -> dict[str]:
+
+def get_api_op():
     # 初始化权限表
     permissions_dict = dict()
     for permission_item in permissions_list:

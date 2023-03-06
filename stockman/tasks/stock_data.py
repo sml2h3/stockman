@@ -11,6 +11,7 @@ from ..utils import db as dbutil
 from ..utils import exceptions
 from .. import configs
 from ..utils import data_factory
+import multiprocessing
 
 
 def select_stock(func):
@@ -36,11 +37,29 @@ def select_stock(func):
         eval_funcs[eval("get_single_stock_history_{}_local".format(item))] = item
     all_stocks_list = get_all_stock_list()
     all_stocks_codes = all_stocks_list.stock_code.values
-    result = []
+    result_op = []
+
+    pool = multiprocessing.Pool(32)
     for stock_code in all_stocks_codes:
+        result_op.append([pool.apply_async(deal_op, (stock_code, eval_funcs, args, func)), stock_code])
+    pool.close()
+    pool.join()
+    result = []
+    for item in result_op:
+        if item != None:
+            if item[0].get():
+                result.append(item[1])
+
+    return result
+
+
+def deal_op(stock_code, eval_funcs, args, func):
+    try:
         datas = {}
         for ef in eval_funcs:
             data = ef(stock_code)
+            if len(data) > 40:
+                data = data[-40:]
             datas[eval_funcs[ef]] = data
         arguments = []
         for arg in args:
@@ -55,11 +74,10 @@ def select_stock(func):
         elif type(res) == bool:
             pass
         else:
-            raise exceptions.NotAllowedFormat("公式返回了非Bool类型结果")
-        if res:
-            result.append(stock_code)
-    return result
-
+            res = False
+    except Exception:
+        res = False
+    return res
 
 
 def get_all_stock_list():
@@ -68,6 +86,7 @@ def get_all_stock_list():
     datas = db.get_all_stock_list()
     datas = data_factory.to_data_frame(datas, ["Id"])
     return datas
+
 
 # 从本地数据库中取单个股票的日K线数据
 def get_single_stock_history_daily_k_local(code):

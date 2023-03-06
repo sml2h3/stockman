@@ -163,3 +163,10 @@ class Tushare(BaseApi):
                 item = [int(n) if n is not None else 0 for n in item]
                 data.append(item)
         return data
+
+    @staticmethod
+    def stock_ths_index():
+        pro = ts.pro_api()
+        # 拉取数据
+        df = pro.ths_index()
+        return df

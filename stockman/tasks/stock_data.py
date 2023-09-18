@@ -36,7 +36,9 @@ def select_stock(func):
     for item in data_type:
         eval_funcs[eval("get_single_stock_history_{}_local".format(item))] = item
     all_stocks_list = get_all_stock_list()
+
     all_stocks_codes = all_stocks_list.stock_code.values
+
     result_op = []
 
     pool = multiprocessing.Pool(32)
@@ -47,8 +49,9 @@ def select_stock(func):
     result = []
     for item in result_op:
         if item != None:
-            if item[0].get():
-                result.append(item[1])
+            res = item[0].get()
+            if res[0]:
+                result.append([item[1], res[1]])
 
     return result
 
@@ -67,16 +70,15 @@ def deal_op(stock_code, eval_funcs, args, func):
         res = func(*arguments)
         if type(res) == np.ndarray:
             res = res.tolist()
-            if len(res) > 0:
-                res = res[-1]
-            else:
-                res = False
         elif type(res) == bool:
+            res = [res, []]
+        elif type(res) == list:
             pass
         else:
-            res = False
+            res = [False, []]
+
     except Exception:
-        res = False
+        res = [False, []]
     return res
 
 

@@ -12,7 +12,7 @@ stock = stockman.Stock(res)
 
 
 def update_daily_k_data():
-    stock.update_daily_k_data()
+    return stock.update_daily_k_data()
 
 
 def update_stock_list_data():

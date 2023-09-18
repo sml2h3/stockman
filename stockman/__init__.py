@@ -38,7 +38,7 @@ class Stock:
 
     @staticmethod
     def update_daily_k_data():
-        update.update_daily_k_data()
+        return update.update_daily_k_data()
 
     '''
         更新股票列表数据到最近一个交易日数据

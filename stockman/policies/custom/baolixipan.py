@@ -10,7 +10,10 @@ def blxp(c: daily_k.stock_close, h: daily_k.stock_high, l: daily_k.stock_low, o:
     idx = 0
 
     for idx, item in enumerate(recent_days_c):
-        if item >= recent_days_o[idx] * 1.09:
+        if idx - 1 < 0:
+            continue
+        # 需要先找到涨停的，并且有实体阳线
+        if item >= recent_days_c[idx-1] * 1.09 and (item / recent_days_c[idx - 1]) - (recent_days_o[idx] / recent_days_c[idx-1]) > 0.05:
             idx_d = idx - 8
             now_c = c[idx_d + 1]
             last_c = c[idx_d]
@@ -28,7 +31,7 @@ def blxp(c: daily_k.stock_close, h: daily_k.stock_high, l: daily_k.stock_low, o:
             # 必须高开
             if now_o > last_c:
                 # 成交量必须是倍量,至少1.5
-                if last_v * 2 < now_v:
+                if last_v * 1.8 < now_v:
                     # 必须冲高，至少6%
                     if now_h / last_c - 1 > 0.06:
                         # 必须低走, 但是最低不能超过水下-2

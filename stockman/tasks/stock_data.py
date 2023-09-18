@@ -38,7 +38,6 @@ def select_stock(func):
     all_stocks_list = get_all_stock_list()
 
     all_stocks_codes = all_stocks_list.stock_code.values
-
     result_op = []
 
     pool = multiprocessing.Pool(32)
